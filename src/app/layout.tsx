@@ -1,33 +1,41 @@
 import type { Metadata } from "next";
-import { Cinzel, Playfair_Display } from "next/font/google";
+import { Alegreya_SC, JetBrains_Mono, Onest } from "next/font/google";
 import "./globals.css";
 
-const cinzel = Cinzel({
-  subsets: ["latin"],
-  variable: "--font-cinzel-var",
-  weight: ["400", "600", "700"],
+const alegreya = Alegreya_SC({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-alegreya",
+  weight: "400",
   display: "swap",
 });
 
-const playfair = Playfair_Display({
+const onest = Onest({
   subsets: ["latin", "cyrillic"],
-  variable: "--font-cormorant-var",
-  weight: ["400", "500", "600", "700"],
+  variable: "--font-onest",
   display: "swap",
 });
+
+const mono = JetBrains_Mono({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-jetbrains",
+  display: "swap",
+});
+
+const description =
+  "Lunet считает лист персонажа за вас, а мастеру даёт пульт сессии: группа, карты, видео, музыка и журнал стола — в одной вкладке. D&D 5e, PbtA и ваши собственные правила.";
 
 export const metadata: Metadata = {
-  title: "LUnet — DnD платформа для русскоязычного сообщества",
-  description:
-    "Найди группу, веди кампании, общайся. LUnet — единая платформа для русскоязычного DnD сообщества. Скоро.",
+  title: "Lunet — лист персонажа и стол для НРИ",
+  description,
   metadataBase: new URL("https://lunet.one"),
   openGraph: {
-    title: "LUnet",
-    description: "DnD платформа для русскоязычного сообщества",
+    title: "Lunet — меньше считать, больше играть",
+    description,
     url: "https://lunet.one",
-    siteName: "LUnet",
+    siteName: "Lunet",
     locale: "ru_RU",
     type: "website",
+    images: ["/images/hero-table.png"],
   },
 };
 
@@ -39,7 +47,7 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${cinzel.variable} ${playfair.variable} h-full`}
+      className={`${alegreya.variable} ${onest.variable} ${mono.variable} scroll-smooth`}
     >
       <body className="min-h-full antialiased">{children}</body>
     </html>
