@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import {
   ArrowDown,
@@ -11,6 +12,7 @@ import {
   ScrollText,
   Search,
   Send,
+  TrendingUp,
   UserRoundPlus,
   Users,
   WifiOff,
@@ -18,18 +20,24 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import Logo from "@/components/Logo";
+import type { Dictionary, Item, Responsive } from "@/dictionaries/en";
+import { getDictionary, hasLocale, locales, type Locale } from "@/i18n";
 
 const APP_URL = "https://play.lunet.one";
 
-const NAV = [
-  { href: "#players", label: "Игрокам" },
-  { href: "#masters", label: "Мастерам" },
-  { href: "#rules", label: "Правила" },
-  { href: "#start", label: "Как начать" },
-];
+type T = { t: Dictionary };
+
+function nav(t: Dictionary) {
+  return [
+    { href: "#players", label: t.nav.players },
+    { href: "#masters", label: t.nav.masters },
+    { href: "#rules", label: t.nav.rules },
+    { href: "#start", label: t.nav.start },
+  ];
+}
 
 /** Desktop copy with a shorter mobile variant. */
-function R({ d, m }: { d: ReactNode; m: ReactNode }) {
+function R({ d, m }: Responsive) {
   return (
     <>
       <span className="hidden lg:inline">{d}</span>
@@ -63,36 +71,55 @@ function Brand() {
   );
 }
 
-function TelegramButton({ className = "" }: { className?: string }) {
+function LocaleSwitch({ lang, label }: { lang: Locale; label: string }) {
+  return (
+    <nav aria-label={label} className="flex items-center gap-1 font-mono text-[13px]">
+      {locales.map((l) =>
+        l === lang ? (
+          <span key={l} aria-current="true" className="px-1.5 py-1 text-fg uppercase">
+            {l}
+          </span>
+        ) : (
+          <a key={l} href={`/${l}`} hrefLang={l} lang={l} className="px-1.5 py-1 text-fg-3 uppercase transition hover:text-fg">
+            {l}
+          </a>
+        ),
+      )}
+    </nav>
+  );
+}
+
+function TelegramButton({ t, className = "" }: T & { className?: string }) {
   return (
     <a
       href={APP_URL}
       className={`inline-flex h-[54px] items-center justify-center gap-2 rounded-lg bg-accent px-6 text-[16px] font-semibold text-accent-ink transition hover:brightness-110 ${className}`}
     >
       <Send className="size-[18px]" strokeWidth={2.25} />
-      Войти через Telegram
+      {t.telegram}
     </a>
   );
 }
 
-function Nav() {
+function Nav({ t, lang }: T & { lang: Locale }) {
   return (
-    <header className="flex h-16 items-center gap-9 px-page lg:h-[76px]">
+    <header className="flex h-16 items-center gap-4 px-page lg:h-[76px] lg:gap-9">
       <Brand />
       <div className="flex-1" />
       <nav className="hidden items-center gap-9 lg:flex">
-        {NAV.map((item) => (
+        {nav(t).map((item) => (
           <a key={item.href} href={item.href} className="text-[15px] text-fg-2 transition hover:text-fg">
             {item.label}
           </a>
         ))}
       </nav>
+      <LocaleSwitch lang={lang} label={t.nav.language} />
       <a
         href={APP_URL}
         className="inline-flex h-9 items-center gap-2 rounded-lg bg-raised px-3.5 text-[14px] font-semibold transition hover:bg-line-strong lg:h-10 lg:px-4"
       >
         <LogIn className="size-4" />
-        Войти
+        {t.nav.login}
       </a>
     </header>
   );
@@ -109,11 +136,11 @@ function D20({ value }: { value: number }) {
   );
 }
 
-function RollCard() {
+function RollCard({ t }: T) {
   return (
     <div className="absolute bottom-3.5 left-3.5 z-10 flex w-[min(300px,calc(100%-28px))] flex-col gap-2.5 rounded-xl bg-surface px-3.5 pt-3 pb-3.5 shadow-[0_12px_32px_#00000066] outline outline-line-strong lg:bottom-8 lg:left-8">
       <div className="flex items-center gap-2">
-        <div className="flex-1 text-[11px] font-semibold tracking-[1.2px] text-fg-2">ПРОВЕРКА · МЕДИЦИНА</div>
+        <div className="flex-1 text-[11px] font-semibold tracking-[1.2px] text-fg-2">{t.hero.roll.label}</div>
         <X className="size-3.5 text-fg-3" />
       </div>
       <div className="flex items-end gap-3">
@@ -122,7 +149,7 @@ function RollCard() {
             <D20 value={17} />
             <span className="font-mono text-[14px] text-fg-2">+ 2</span>
           </div>
-          <div className="font-mono text-[12px] text-fg-3">1к20 + 2</div>
+          <div className="font-mono text-[12px] text-fg-3">{t.hero.roll.formula}</div>
         </div>
         <div className="font-mono text-[40px] leading-none font-semibold">19</div>
       </div>
@@ -130,15 +157,15 @@ function RollCard() {
   );
 }
 
-function NowPlaying() {
+function NowPlaying({ t }: T) {
   return (
     <div className="absolute top-7 right-6 z-10 hidden h-[60px] w-[340px] items-center gap-3 rounded-full bg-[#0A0B0EF2] pr-[18px] pl-2.5 shadow-[0_12px_32px_#00000080] outline outline-white/8 backdrop-blur-md xl:flex">
       <div className="flex size-10 items-center justify-center rounded-full bg-linear-225 from-[#A08FFF] to-[#5A44D4]">
         <Music className="size-[18px] text-white" />
       </div>
       <div className="flex flex-1 flex-col gap-0.5">
-        <div className="text-[10px] font-bold tracking-[1px] text-violet">СЕЙЧАС ИГРАЕТ</div>
-        <div className="text-[14px] font-semibold">Дождь над Эльсвиром</div>
+        <div className="text-[10px] font-bold tracking-[1px] text-violet">{t.hero.nowPlaying.label}</div>
+        <div className="text-[14px] font-semibold">{t.hero.nowPlaying.track}</div>
       </div>
       <div className="flex h-[18px] items-end gap-[3px]" aria-hidden="true">
         {[10, 18, 7, 14].map((h, i) => (
@@ -153,61 +180,52 @@ function NowPlaying() {
   );
 }
 
-function Hero() {
+function Hero({ t }: T) {
   return (
     <section className="flex flex-col gap-10 px-page pt-6 pb-10 lg:h-[700px] lg:flex-row lg:items-center lg:gap-14 lg:pt-14 lg:pb-16">
       <div className="flex flex-col gap-6 lg:w-[600px] lg:shrink-0 lg:gap-7">
         <div className="inline-flex h-[30px] w-fit items-center gap-2 rounded-full bg-accent/12 px-3.5 text-[13px] font-semibold text-accent">
           <Logo className="size-4" />
-          Лист персонажа и стол для НРИ
+          {t.hero.badge}
         </div>
         <h1 className="font-display text-[46px] leading-[46px] lg:text-[80px] lg:leading-[80px]">
-          Меньше считать.
+          {t.hero.title[0]}
           <br />
-          Больше играть.
+          {t.hero.title[1]}
         </h1>
         <p className="text-[16px] leading-6 text-fg-2 lg:w-[540px] lg:text-[19px] lg:leading-[29px]">
-          <R
-            d="Lunet считает лист персонажа за вас, а мастеру даёт пульт сессии: группа, карты, видео, музыка и журнал стола — в одной вкладке. D&D 5e, PbtA и ваши собственные правила."
-            m="Lunet считает лист персонажа за вас, а мастеру даёт пульт сессии: группа, карты, видео, музыка и журнал стола — в одной вкладке."
-          />
+          <R {...t.hero.lead} />
         </p>
         <div className="flex items-center gap-3">
-          <TelegramButton className="w-full lg:w-auto" />
+          <TelegramButton t={t} className="w-full lg:w-auto" />
           <a
             href="#look"
             className="hidden h-[54px] items-center gap-2 rounded-lg px-[18px] text-[16px] font-semibold text-fg-2 outline outline-line-strong transition hover:text-fg lg:inline-flex"
           >
             <ArrowDown className="size-4" />
-            Как это выглядит
+            {t.hero.look}
           </a>
         </div>
         <div className="text-[14px] text-fg-3">
-          <R d="В браузере, без установки · телефон, планшет, ноутбук" m="В браузере, без установки" />
+          <R {...t.hero.note} />
         </div>
       </div>
       <div className="relative h-[280px] overflow-hidden rounded-[20px] bg-surface outline outline-line lg:h-full lg:flex-1 lg:rounded-3xl">
         <Image
           src="/images/hero-table.png"
-          alt="Игроки за столом с листами Lunet"
+          alt={t.hero.imageAlt}
           fill
           preload
           sizes="(min-width: 1024px) 50vw, 100vw"
           className="object-cover"
         />
         <div className="absolute inset-0 bg-linear-to-b from-bg/0 from-45% to-bg/85" />
-        <NowPlaying />
-        <RollCard />
+        <NowPlaying t={t} />
+        <RollCard t={t} />
       </div>
     </section>
   );
 }
-
-const PREVIEW_NOTES = [
-  { title: "Ваш лист — как вы его собрали", text: "Плитки, вкладки, свои плитки. Тот же лист дома и за столом." },
-  { title: "Сессия — колонкой рядом", text: "Показанное мастером, чат, журнал стола, группа и звук. Свернули — лист на весь экран." },
-  { title: "Показ — сразу у всех", text: "Карта или ролик появляются у игроков в ту же секунду. Видео смотрят вместе." },
-];
 
 function Screenshot({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
   return (
@@ -217,12 +235,12 @@ function Screenshot({ src, alt, className = "" }: { src: string; alt: string; cl
   );
 }
 
-function Preview() {
+function Preview({ t }: T) {
   return (
     <section id="look" className="hidden flex-col gap-7 px-page pt-6 pb-24 lg:flex">
-      <Screenshot src="/images/sheet-session.png" alt="Лист персонажа и колонка сессии в Lunet" />
+      <Screenshot src="/images/sheet-session.png" alt={t.preview.imageAlt} />
       <div className="grid grid-cols-3 gap-6">
-        {PREVIEW_NOTES.map((note, i) => (
+        {t.preview.notes.map((note, i) => (
           <div key={note.title} className="flex flex-col gap-1.5 border-t border-line pt-4">
             <div className="font-mono text-[13px] text-accent">0{i + 1}</div>
             <div className="text-[17px] font-semibold">{note.title}</div>
@@ -234,61 +252,31 @@ function Preview() {
   );
 }
 
-type Feature = { icon: LucideIcon; title: string; d: string; m: string };
+const PLAYER_ICONS: Record<keyof Dictionary["players"]["features"], LucideIcon> = {
+  roll: Dices,
+  breakdown: Search,
+  levelUp: TrendingUp,
+  layout: LayoutGrid,
+  offline: WifiOff,
+};
 
-const PLAYER_FEATURES: Feature[] = [
-  {
-    icon: Dices,
-    title: "Нажал — бросил",
-    d: "Проверки, спасброски, атаки и заклинания бросаются прямо с листа. Преимущество, помеха и состояния — сами.",
-    m: "Проверки, атаки и заклинания — прямо с листа, состояния учтены.",
-  },
-  {
-    icon: Search,
-    title: "Откуда это число?",
-    d: "Нажмите на любое число — и увидите всю цепочку: база, бонусы, условия, источник.",
-    m: "Нажмите на любое число — вся цепочка бонусов и условий.",
-  },
-  {
-    icon: LayoutGrid,
-    title: "Лист под вас",
-    d: "Плитки, вкладки и свои плитки — раскладка ваша, и за столом она та же.",
-    m: "Плитки, вкладки, свои плитки — за столом та же раскладка.",
-  },
-  {
-    icon: WifiOff,
-    title: "Без сети тоже",
-    d: "Телефон, планшет, ноутбук. Загрузился один раз — работает и без интернета.",
-    m: "Загрузился один раз — работает и без интернета.",
-  },
-];
+const MASTER_ICONS: Record<keyof Dictionary["masters"]["features"], LucideIcon> = {
+  party: Users,
+  show: ImageIcon,
+  sound: AudioLines,
+  log: ScrollText,
+};
 
-const MASTER_FEATURES: Feature[] = [
-  {
-    icon: Users,
-    title: "Группа вживую",
-    d: "Хиты, КД и состояния каждого — без вопросов «сколько у тебя осталось». Урон и лечение сразу нескольким.",
-    m: "Хиты и состояния каждого; урон и лечение сразу нескольким.",
-  },
-  {
-    icon: ImageIcon,
-    title: "Показ одним нажатием",
-    d: "Карта, портрет или ролик — у всех или у одного игрока. Видео смотрят вместе: пауза мастера — пауза у всех.",
-    m: "Карта или ролик — у всех сразу; видео смотрят вместе.",
-  },
-  {
-    icon: AudioLines,
-    title: "Звук стола",
-    d: "Музыка и атмосфера играют у всех синхронно, эффекты — одной кнопкой. Громкость каждый ставит себе сам.",
-    m: "Музыка и атмосфера синхронно, эффекты — одной кнопкой.",
-  },
-  {
-    icon: ScrollText,
-    title: "Журнал стола",
-    d: "Кто что бросил и что поменял мастер — одной лентой. Ошиблись — отменили.",
-    m: "Кто что бросил и что поменял мастер. Ошиблись — отменили.",
-  },
-];
+const STEP_ICONS: Record<keyof Dictionary["steps"]["items"], LucideIcon> = {
+  login: Send,
+  table: Users,
+  character: UserRoundPlus,
+};
+
+/** Pairs each icon with its copy, in the icon map's order. */
+function withIcons<K extends string>(icons: Record<K, LucideIcon>, items: Record<K, Item>) {
+  return (Object.keys(icons) as K[]).map((key) => ({ key, icon: icons[key], ...items[key] }));
+}
 
 function Phone({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
   return (
@@ -298,29 +286,26 @@ function Phone({ src, alt, className = "" }: { src: string; alt: string; classNa
   );
 }
 
-function Players() {
+function Players({ t }: T) {
   return (
     <section
       id="players"
       className="grid gap-x-16 gap-y-8 border-y border-line bg-bg-2 px-page py-14 lg:grid-cols-[1fr_auto] lg:items-center lg:py-28"
     >
       <div className="flex flex-col gap-4 lg:col-start-1 lg:gap-6 lg:self-end">
-        <Eyebrow>Игрокам</Eyebrow>
-        <H2>Лист, который считает сам</H2>
+        <Eyebrow>{t.players.eyebrow}</Eyebrow>
+        <H2>{t.players.title}</H2>
         <p className="text-[16px] leading-6 text-fg-2 lg:max-w-[560px] lg:text-[18px] lg:leading-[27px]">
-          <R
-            d="Мастер просит проверку Медицины — вы нажимаете на строку, и всё уже учтено: владение, отравление, благословение союзника."
-            m="Мастер просит проверку Медицины — нажимаете на строку, и всё уже учтено."
-          />
+          <R {...t.players.lead} />
         </p>
       </div>
       <div className="flex justify-center gap-6 lg:col-start-2 lg:row-span-2 lg:row-start-1">
-        <Phone src="/images/phone-sheet.png" alt="Лист персонажа на телефоне" />
-        <Phone src="/images/phone-show.png" alt="Показ мастера на телефоне" className="mt-16 hidden lg:block" />
+        <Phone src="/images/phone-sheet.png" alt={t.players.phoneSheetAlt} />
+        <Phone src="/images/phone-show.png" alt={t.players.phoneShowAlt} className="mt-16 hidden lg:block" />
       </div>
       <ul className="flex flex-col gap-[22px] lg:col-start-1 lg:self-start lg:pt-3">
-        {PLAYER_FEATURES.map(({ icon: Icon, title, d, m }) => (
-          <li key={title} className="flex gap-4">
+        {withIcons(PLAYER_ICONS, t.players.features).map(({ key, icon: Icon, title, d, m }) => (
+          <li key={key} className="flex gap-4">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-raised">
               <Icon className="size-5" />
             </div>
@@ -337,28 +322,19 @@ function Players() {
   );
 }
 
-const SYSTEMS = [
-  { name: "D&D 5e · 2014", text: "весь SRD 5.1: 12 классов с 1 по 20 уровень, 319 заклинаний" },
-  { name: "PbtA", text: "ходы, треки, вред и опыт" },
-  { name: "Ваша система", text: "хоумбрю и свои правила — теми же файлами" },
-];
-
-function Rules() {
+function Rules({ t }: T) {
   return (
     <section id="rules" className="flex flex-col gap-8 bg-paper px-page py-14 lg:flex-row lg:items-center lg:gap-[72px] lg:py-28">
       <div className="flex flex-col gap-4 lg:w-[560px] lg:shrink-0 lg:gap-6">
-        <Eyebrow className="text-paper-accent">Правила</Eyebrow>
-        <H2 className="text-paper-ink">Правила — это данные, а не код</H2>
+        <Eyebrow className="text-paper-accent">{t.rules.eyebrow}</Eyebrow>
+        <H2 className="text-paper-ink">{t.rules.title}</H2>
         <p className="text-[16px] leading-6 text-paper-fg-2 lg:text-[18px] lg:leading-[27px]">
-          <R
-            d="Каждая система — набор файлов. Поменяли правило — лист обновился у всех за столом, без обновления программы. Своя магия, свои состояния, своя система целиком."
-            m="Поменяли правило — лист обновился у всех за столом. D&D 5e (весь SRD 5.1), PbtA и ваша система."
-          />
+          <R {...t.rules.lead} />
         </p>
         <ul className="hidden flex-col gap-3 pt-2 lg:flex">
-          {SYSTEMS.map((s) => (
+          {t.rules.systems.map((s) => (
             <li key={s.name} className="flex items-center gap-3">
-              <span className="inline-flex h-[30px] items-center rounded-full bg-white px-3 text-[14px] font-semibold text-paper-ink outline outline-paper-line">
+              <span className="inline-flex h-[30px] shrink-0 items-center rounded-full bg-white px-3 text-[14px] font-semibold text-paper-ink outline outline-paper-line">
                 {s.name}
               </span>
               <span className="text-[15px] text-paper-fg-2">{s.text}</span>
@@ -378,51 +354,47 @@ function Rules() {
           </div>
           <pre className="overflow-x-auto px-5 pt-5 pb-6 font-mono text-[13px] leading-[21px] text-fg-2 lg:px-6 lg:text-[15px] lg:leading-[27px]">
             <code>
-              <span className="text-fg">умение:аура_защиты:</span>
-              {"\n  label: Аура защиты\n  rules:\n"}
-              <span className="hidden text-fg-3 lg:inline">{"    # одно правило на все шесть спасбросков\n"}</span>
-              <span className="text-violet">
-                {"    - when: "}
-                <R d={'"not has(владелец.состояние:без_сознания)"'} m={'"not has(…без_сознания)"'} />
-              </span>
+              <span className="text-fg">feature:aura_of_protection:</span>
+              {`\n  label: ${t.rules.code.label}\n  rules:\n`}
+              <span className="hidden text-fg-3 lg:inline">{`    ${t.rules.code.comment}\n`}</span>
+              <span className="text-violet">{'    - when: "not has(owner.condition:unconscious)"'}</span>
               {"\n"}
-              <span className="text-[#5AA9FF]">{'      target: "владелец.спасбросок:*"'}</span>
+              <span className="text-[#5AA9FF]">{'      target: "owner.save:*"'}</span>
               {"\n      op: add\n"}
-              <span className="text-[#FF8763]">
-                {"      value: "}
-                <R d={'"max(владелец.мод:харизма, 1)"'} m={'"max(…мод:харизма, 1)"'} />
-              </span>
+              <span className="text-[#FF8763]">{'      value: "max(owner.mod:cha, 1)"'}</span>
             </code>
           </pre>
         </div>
-        <p className="hidden text-[14px] leading-[21px] text-paper-fg-2 lg:block">
-          Настоящий файл из Lunet: Аура защиты паладина. Без сознания — прибавка к спасброскам пропадает сама, и лист
-          покажет почему.
-        </p>
+        <p className="hidden text-[14px] leading-[21px] text-paper-fg-2 lg:block">{t.rules.caption}</p>
+        <ul className="grid gap-4 pt-2 sm:grid-cols-2 lg:gap-6">
+          {t.rules.table.map((item) => (
+            <li key={item.title} className="flex flex-col gap-1 border-t border-paper-line pt-3">
+              <div className="text-[16px] font-semibold text-paper-ink">{item.title}</div>
+              <div className="text-[14px] leading-[21px] text-paper-fg-2 lg:text-[15px] lg:leading-[23px]">{item.text}</div>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );
 }
 
-function Masters() {
+function Masters({ t }: T) {
   return (
     <section id="masters" className="flex flex-col gap-8 px-page py-14 lg:gap-12 lg:py-28">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:gap-16">
         <div className="flex flex-col gap-4 lg:w-[640px] lg:shrink-0 lg:gap-6">
-          <Eyebrow>Мастерам</Eyebrow>
-          <H2>Пульт сессии: весь стол на одном экране</H2>
+          <Eyebrow>{t.masters.eyebrow}</Eyebrow>
+          <H2>{t.masters.title}</H2>
         </div>
         <p className="text-[16px] leading-6 text-fg-2 lg:flex-1 lg:text-[18px] lg:leading-[27px]">
-          <R
-            d="Не нужно держать открытыми пять вкладок, плеер и чат в телефоне. Группа, показ, музыка и журнал — рядом, и каждое действие сразу видно игрокам."
-            m="Группа, показ, музыка и журнал рядом — каждое действие сразу видно игрокам."
-          />
+          <R {...t.masters.lead} />
         </p>
       </div>
-      <Screenshot src="/images/console.png" alt="Пульт мастера в Lunet" />
+      <Screenshot src="/images/console.png" alt={t.masters.imageAlt} />
       <ul className="grid gap-[22px] lg:grid-cols-4 lg:gap-8">
-        {MASTER_FEATURES.map(({ icon: Icon, title, d, m }) => (
-          <li key={title} className="flex gap-4 lg:flex-col lg:gap-3">
+        {withIcons(MASTER_ICONS, t.masters.features).map(({ key, icon: Icon, title, d, m }) => (
+          <li key={key} className="flex gap-4 lg:flex-col lg:gap-3">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-surface outline outline-line lg:size-11">
               <Icon className="size-5" />
             </div>
@@ -439,38 +411,17 @@ function Masters() {
   );
 }
 
-const STEPS = [
-  {
-    icon: Send,
-    title: "Войдите через Telegram",
-    d: "Без паролей и почты: одно нажатие в Telegram — и вы в Lunet.",
-    m: "Без паролей и почты.",
-  },
-  {
-    icon: Users,
-    title: "Соберите стол",
-    d: "Мастер заводит кампанию и зовёт игроков ссылкой. Игрок открывает её — и уже за столом.",
-    m: "Мастер зовёт игроков ссылкой.",
-  },
-  {
-    icon: UserRoundPlus,
-    title: "Заведите персонажа",
-    d: "По шагам системы — раса, класс, характеристики — или перенесите готового из Long Story Short.",
-    m: "По шагам системы или из Long Story Short.",
-  },
-];
-
-function Steps() {
+function Steps({ t }: T) {
   return (
     <section id="start" className="flex flex-col gap-8 border-t border-line bg-bg-2 px-page py-14 lg:gap-12 lg:py-28">
       <div className="flex flex-col gap-4 lg:gap-5">
-        <Eyebrow>Как начать</Eyebrow>
-        <H2>Три шага до первой сессии</H2>
+        <Eyebrow>{t.steps.eyebrow}</Eyebrow>
+        <H2>{t.steps.title}</H2>
       </div>
       <ol className="grid gap-3 lg:grid-cols-3 lg:gap-6">
-        {STEPS.map(({ icon: Icon, title, d, m }, i) => (
+        {withIcons(STEP_ICONS, t.steps.items).map(({ key, icon: Icon, title, d, m }, i) => (
           <li
-            key={title}
+            key={key}
             className="flex items-center gap-4 rounded-2xl bg-bg p-[18px] outline outline-line lg:flex-col lg:items-stretch lg:p-7"
           >
             <div className="flex items-center lg:w-full">
@@ -492,17 +443,13 @@ function Steps() {
   );
 }
 
-function FinalCta() {
+function FinalCta({ t }: T) {
   return (
     <section className="flex flex-col items-center gap-6 bg-[radial-gradient(ellipse_55%_70%_at_50%_35%,#FF6A3D29_0%,#0E101400_70%)] px-page py-[72px] text-center lg:gap-7 lg:py-32">
       <Logo className="size-14 text-accent lg:size-[72px]" />
-      <h2 className="font-display text-[34px] leading-[36px] lg:text-[60px] lg:leading-[63px]">
-        Соберите стол на этой неделе
-      </h2>
-      <p className="hidden text-[18px] text-fg-2 lg:block">
-        Лист, пульт мастера и вся кампания — в браузере, без установки.
-      </p>
-      <TelegramButton className="w-full lg:h-[58px] lg:w-auto lg:px-7 lg:text-[17px]" />
+      <h2 className="font-display text-[34px] leading-[36px] lg:text-[60px] lg:leading-[63px]">{t.cta.title}</h2>
+      <p className="hidden text-[18px] text-fg-2 lg:block">{t.cta.text}</p>
+      <TelegramButton t={t} className="w-full lg:h-[58px] lg:w-auto lg:px-7 lg:text-[17px]" />
       <a href={APP_URL} className="font-mono text-[14px] text-fg-3 transition hover:text-fg-2">
         play.lunet.one
       </a>
@@ -510,42 +457,50 @@ function FinalCta() {
   );
 }
 
-function Footer() {
+function Footer({ t, lang }: T & { lang: Locale }) {
   return (
     <footer className="flex flex-col gap-3 border-t border-line px-page pt-6 pb-10 lg:h-[88px] lg:flex-row lg:items-center lg:gap-8 lg:py-0">
       <Brand />
       <div className="text-[14px] text-fg-3 lg:flex-1">
-        Лист и стол для НРИ<span className="lg:hidden"> · © 2026</span>
+        {t.footer.tagline}
+        <span className="lg:hidden"> · © 2026</span>
       </div>
       <nav className="hidden items-center gap-8 text-[14px] text-fg-2 lg:flex">
-        {NAV.slice(0, 3).map((item) => (
-          <a key={item.href} href={item.href} className="transition hover:text-fg">
-            {item.label}
-          </a>
-        ))}
+        {nav(t)
+          .slice(0, 3)
+          .map((item) => (
+            <a key={item.href} href={item.href} className="transition hover:text-fg">
+              {item.label}
+            </a>
+          ))}
         <a href={APP_URL} className="transition hover:text-fg">
-          Войти
+          {t.nav.login}
         </a>
       </nav>
+      <LocaleSwitch lang={lang} label={t.nav.language} />
       <div className="hidden font-mono text-[13px] text-fg-3 lg:block">© 2026</div>
     </footer>
   );
 }
 
-export default function Home() {
+export default async function Home({ params }: PageProps<"/[lang]">) {
+  const { lang } = await params;
+  if (!hasLocale(lang)) notFound();
+  const t = await getDictionary(lang);
+
   return (
     <div id="top" className="overflow-hidden">
-      <Nav />
+      <Nav t={t} lang={lang} />
       <main>
-        <Hero />
-        <Preview />
-        <Players />
-        <Rules />
-        <Masters />
-        <Steps />
-        <FinalCta />
+        <Hero t={t} />
+        <Preview t={t} />
+        <Players t={t} />
+        <Rules t={t} />
+        <Masters t={t} />
+        <Steps t={t} />
+        <FinalCta t={t} />
       </main>
-      <Footer />
+      <Footer t={t} lang={lang} />
     </div>
   );
 }
