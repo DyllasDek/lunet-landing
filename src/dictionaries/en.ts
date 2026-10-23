@@ -11,6 +11,12 @@ const en = {
       "Lunet does the math on your character sheet and gives the GM a session console: party, maps, video, music and the table log in one tab. D&D 5e, PbtA and your own rules.",
     ogLocale: "en_US",
   },
+  images: {
+    sheetSession: "/images/en/sheet-session.png",
+    console: "/images/en/console.png",
+    phoneSheet: "/images/en/phone-sheet.png",
+    phoneShow: "/images/en/phone-show.png",
+  },
   nav: {
     players: "For players",
     masters: "For GMs",

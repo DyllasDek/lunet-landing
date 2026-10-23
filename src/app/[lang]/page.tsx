@@ -238,7 +238,7 @@ function Screenshot({ src, alt, className = "" }: { src: string; alt: string; cl
 function Preview({ t }: T) {
   return (
     <section id="look" className="hidden flex-col gap-7 px-page pt-6 pb-24 lg:flex">
-      <Screenshot src="/images/sheet-session.png" alt={t.preview.imageAlt} />
+      <Screenshot src={t.images.sheetSession} alt={t.preview.imageAlt} />
       <div className="grid grid-cols-3 gap-6">
         {t.preview.notes.map((note, i) => (
           <div key={note.title} className="flex flex-col gap-1.5 border-t border-line pt-4">
@@ -300,8 +300,8 @@ function Players({ t }: T) {
         </p>
       </div>
       <div className="flex justify-center gap-6 lg:col-start-2 lg:row-span-2 lg:row-start-1">
-        <Phone src="/images/phone-sheet.png" alt={t.players.phoneSheetAlt} />
-        <Phone src="/images/phone-show.png" alt={t.players.phoneShowAlt} className="mt-16 hidden lg:block" />
+        <Phone src={t.images.phoneSheet} alt={t.players.phoneSheetAlt} />
+        <Phone src={t.images.phoneShow} alt={t.players.phoneShowAlt} className="mt-16 hidden lg:block" />
       </div>
       <ul className="flex flex-col gap-[22px] lg:col-start-1 lg:self-start lg:pt-3">
         {withIcons(PLAYER_ICONS, t.players.features).map(({ key, icon: Icon, title, d, m }) => (
@@ -391,7 +391,7 @@ function Masters({ t }: T) {
           <R {...t.masters.lead} />
         </p>
       </div>
-      <Screenshot src="/images/console.png" alt={t.masters.imageAlt} />
+      <Screenshot src={t.images.console} alt={t.masters.imageAlt} />
       <ul className="grid gap-[22px] lg:grid-cols-4 lg:gap-8">
         {withIcons(MASTER_ICONS, t.masters.features).map(({ key, icon: Icon, title, d, m }) => (
           <li key={key} className="flex gap-4 lg:flex-col lg:gap-3">

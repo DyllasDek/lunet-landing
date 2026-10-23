@@ -8,6 +8,12 @@ const ru: Dictionary = {
       "Lunet считает лист персонажа за вас, а мастеру даёт пульт сессии: группа, карты, видео, музыка и журнал стола — в одной вкладке. D&D 5e, PbtA и ваши собственные правила.",
     ogLocale: "ru_RU",
   },
+  images: {
+    sheetSession: "/images/sheet-session.png",
+    console: "/images/console.png",
+    phoneSheet: "/images/phone-sheet.png",
+    phoneShow: "/images/phone-show.png",
+  },
   nav: {
     players: "Игрокам",
     masters: "Мастерам",
